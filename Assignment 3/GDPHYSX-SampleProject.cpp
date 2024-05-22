@@ -4,25 +4,25 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "P6/MyVector.h"
-#include "P6/P6Particle.h"
-
 #include <iostream>
 #include <string>
+
+//include for time
 #include <chrono>
+using namespace std::chrono_literals;
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
-using namespace std::chrono_literals;
-
-constexpr std::chrono::nanoseconds timestep(64ms);
-
+#include "p6/MyVector.h"
+#include "p6/P6Particle.h"
 
 //Modifier for the model's x Position
 float x_mod = 0;
 float z_mod = 0;
+float y_mod = 0;
 
+float scale = 0.5f;
 
 void Key_Callback(GLFWwindow* window // Pointer to window
     , int key// keycode of press
@@ -30,41 +30,24 @@ void Key_Callback(GLFWwindow* window // Pointer to window
     , int action // either press / release
     , int mods) // which modifier keys are held down
 {
-    if (key == GLFW_KEY_D /*&& action == GLFW_PRESS*/)
-    {
+    if (key == GLFW_KEY_D /*&& action == GLFW_PRESS*/) {
         //Move
         x_mod += 0.1f;
     }
-    if (key == GLFW_KEY_A /*&& action == GLFW_PRESS*/)
-    {
+    if (key == GLFW_KEY_A /*&& action == GLFW_PRESS*/) {
         //Move
         x_mod -= 0.1f;
     }
-    if (key == GLFW_KEY_W /*&& action == GLFW_PRESS*/)
-    {
+    if (key == GLFW_KEY_W /*&& action == GLFW_PRESS*/) {
         z_mod -= -0.1f;
     }
-    if (key == GLFW_KEY_S /*&& action == GLFW_PRESS*/)
-    {
+    if (key == GLFW_KEY_S /*&& action == GLFW_PRESS*/) {
         z_mod += -0.1f;
     }
 }
 
 int main(void)
 {
-
-    using clock = std::chrono::high_resolution_clock;
-    auto curr_time = clock::now();
-    auto prev_time = curr_time;
-    std::chrono::nanoseconds curr_ns(0);
-
-    P6::P6Particle particle = P6::P6Particle();
-
-    particle.Velocity = P6::MyVector(100, 0, 0);
-    particle.Acceleration = P6::MyVector(-30, 0, 0);
-
-
-
     //load the vert shader file into a string stream
     std::fstream vertSrc("Shaders/Sample.vert");
     std::stringstream vertBuff;
@@ -97,7 +80,7 @@ int main(void)
         return -1;
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(window_width, window_height, "Paul Macaraeg", NULL, NULL);
+    window = glfwCreateWindow(window_width, window_height, "Matthew Jayd Baldonado | Paul Davidion Macaraeg", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -141,12 +124,6 @@ int main(void)
 
     //Set the callback function to the window
     glfwSetKeyCallback(window, Key_Callback);
-
-    /*glViewport(0, // Min x
-        0,//Min y
-        600,//Width
-        600); // Height
-    */
 
     std::string path = "3D/sphere.obj";
     std::vector<tinyobj::shape_t> shapes;
@@ -212,24 +189,20 @@ int main(void)
 
     glm::mat4 identity_martix = glm::mat4(1.0f);
 
+    float x = 0.0;
+    float y = 0.0;
+    float z = 0.0;
 
-    P6::MyVector position(-300, 200, 0);
-
-    //position += P6::MyVector(300, -200, 0);
-
-    float x = position.x;
-    float y = position.y;
-    float z = position.z;
-
-    float scale_x = 300;
-    float scale_y = 300;
-    float scale_z = 300;
+    float scale_x = 500.0;
+    float scale_y = 500.0;
+    float scale_z = 500.0;
 
     float axis_x = 0.0;
     float axis_y = 1.0;
     float axis_z = 0.0;
 
     float theta = 0.0;
+
 
     //Create projection matrix
     glm::mat4 projectionMatrix = glm::ortho(-400.f, //L
@@ -238,12 +211,48 @@ int main(void)
         400.f,//T
         -400.f,//Znear
         400.f);//Zfar
-    
 
-    //glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.f), // FOV
-    //    window_height / window_width, // Aspect Ratio
-    //    0.1f, // ZNear > 0
-    //    100.f); // ZFar
+
+    /*P6::MyVector position(0, -350, 0);*/
+    P6::MyVector scale(30, 30, 0);
+
+
+
+
+    //time in between frames
+    constexpr std::chrono::nanoseconds timestep(64ms);
+
+    //initializing clock variables
+    using clock = std::chrono::high_resolution_clock;
+    auto curr_time = clock::now();
+    auto prev_time = curr_time;
+    std::chrono::nanoseconds curr_ns(0);
+
+    //particle
+    P6::P6Particle particle = P6::P6Particle();
+    particle.Position = P6::MyVector(0, -100, 0);
+
+    float partVx;
+    float partVy;
+    float partVz;
+
+    ////this is 100m/s to the right
+    //particle.Velocity = P6::MyVector(0, 0, 0);
+
+    //this is 100m/s to the left
+    particle.Acceleration = P6::MyVector(0, -50, 0);
+
+    std::cout << "Input Velocity : " << std::endl;
+    std::cout << "X: ";
+    std::cin >> partVx;
+    std::cout << "Y: ";
+    std::cin >> partVy;
+    std::cout << "Z:";
+    std::cin >> partVz;
+
+    particle.Velocity = P6::MyVector(partVx, partVy, partVz);
+
+    bool timeStop = false;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -251,32 +260,52 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        z = z_mod;
-        
+        //time loop
         curr_time = clock::now();
+        //duration between last iteration
         auto dur = std::chrono::duration_cast<std::chrono::nanoseconds> (curr_time - prev_time);
-
+        //set prev with curr for next iterration
         prev_time = curr_time;
-
+        //add duration since last iteration to time since last frame
         curr_ns += dur;
-        if (curr_ns >= timestep)
-        {
+        if (curr_ns >= timestep) {
+            //convert ns to ms
             auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(curr_ns);
             std::cout << "MS: " << (float)ms.count() << "\n";
-
+            //reset
             curr_ns -= curr_ns;
 
-            std::cout << "P6 Update\n";
-            particle.Update((float)ms.count() / 1000);
+            //updates
+            // 
+            //std::cout << "P6 Update\n";
+
+            std::cout << "Position: " << particle.Position.x << ", " << particle.Position.y << ", " << particle.Position.z << std::endl;
+            std::cout << "Velocity: " << particle.Velocity.x << ", " << particle.Velocity.y << ", " << particle.Velocity.z << std::endl;
+
+            particle.update((float)ms.count() / 1000);
+
+            if (timeStop == true)
+            {
+                
+            }
+
+            if (particle.Position.y <= -100 && timeStop == false)
+            {
+                timeStop == true;
+                std::cout << "It took " << " seconds" << " for it to land" << std::endl;
+            }
 
         }
 
-        std::cout << "Normal Update\n";
+        //std::cout << "Normal Update\n";
+
+        z = z_mod;
+
         //Start with the translation matrix
-        glm::mat4 transformation_matrix = glm::translate(identity_martix, (glm::vec3)position);
+        glm::mat4 transformation_matrix = glm::translate(identity_martix, (glm::vec3)particle.Position);
 
         //Multiply the resulting matrix with the scale matrix
-        transformation_matrix = glm::scale(transformation_matrix, glm::vec3(scale_x, scale_y, scale_z));
+        transformation_matrix = glm::scale(transformation_matrix, (glm::vec3)scale);
 
         //Finally, multiply it with the rotation matrix
         transformation_matrix = glm::rotate(transformation_matrix, glm::radians(theta), glm::normalize(glm::vec3(axis_x, axis_y, axis_z)));
@@ -289,12 +318,11 @@ int main(void)
         //Get location of transformation matrix
         unsigned int transformLoc = glGetUniformLocation(shaderProg, "transform");
         //Assign the matrix
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformation_matrix)); \
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformation_matrix));
 
-
-            //Tell openGL to use this shader
-            //for VAO/s below
-            glUseProgram(shaderProg);
+        //Tell openGL to use this shader
+        //for VAO/s below
+        glUseProgram(shaderProg);
         glBindVertexArray(VAO);
 
         //Bind The VAO to prep it for drawing
