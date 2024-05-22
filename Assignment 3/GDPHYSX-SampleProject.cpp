@@ -286,7 +286,7 @@ int main(void)
 
             if (timeStop == true)
             {
-                
+                   
             }
 
             if (particle.Position.y <= -100 && timeStop == false)
