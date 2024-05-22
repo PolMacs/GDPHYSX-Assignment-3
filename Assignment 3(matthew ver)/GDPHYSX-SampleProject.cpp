@@ -15,7 +15,7 @@ using namespace std::chrono_literals;
 #include "tiny_obj_loader.h"
 
 #include "p6/MyVector.h"
-//#include "p6/P6Particle.h"
+#include "p6/P6Particle.h"
 
 //Modifier for the model's x Position
 float x_mod = 0;
@@ -244,6 +244,18 @@ int main(void)
     auto prev_time = curr_time;
     std::chrono::nanoseconds curr_ns(0);
 
+    //particle
+    P6::P6Particle particle = P6::P6Particle();
+
+    //this is 100m/s to the right
+    particle.Velocity = P6::MyVector(100, 0, 0);
+
+    //this is 100m/s to the left
+    particle.Acceleration = P6::MyVector(-30, 0, 0);
+
+
+
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -267,6 +279,8 @@ int main(void)
 
             //updates
             std::cout << "P6 Update\n";
+
+            particle.update((float)ms.count() / 1000);
         }
 
         std::cout << "Normal Update\n";
