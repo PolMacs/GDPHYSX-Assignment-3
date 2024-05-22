@@ -253,6 +253,7 @@ int main(void)
     particle.Velocity = P6::MyVector(partVx, partVy, partVz);
 
     bool timeStop = false;
+    bool isMoving = true;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -268,7 +269,7 @@ int main(void)
         prev_time = curr_time;
         //add duration since last iteration to time since last frame
         curr_ns += dur;
-        if (curr_ns >= timestep) {
+        if (curr_ns >= timestep && isMoving) {
             //convert ns to ms
             auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(curr_ns);
             std::cout << "MS: " << (float)ms.count() << "\n";
@@ -284,15 +285,14 @@ int main(void)
 
             particle.update((float)ms.count() / 1000);
 
-            if (timeStop == true)
-            {
-                   
-            }
 
             if (particle.Position.y <= -100 && timeStop == false)
             {
                 timeStop == true;
-                std::cout << "It took " << " seconds" << " for it to land" << std::endl;
+                isMoving = false;
+                auto start_time = clock::now();
+                std::chrono::duration<double> time_taken = start_time - prev_time;
+                std::cout << "It took " << time_taken.count() << " seconds for it to land" << std::endl;
             }
 
         }
