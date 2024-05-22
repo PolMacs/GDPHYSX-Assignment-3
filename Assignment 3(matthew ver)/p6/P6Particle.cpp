@@ -8,12 +8,13 @@ void P6Particle::UpdatePosition(float time) {
 
 	//p2 = p1 Vt+ [(At^2)/2]
 
-	this->Position = this->Position + (this->Velocity * time) + ((1.0f / 2.0f) * (this->Acceleration * time * time));
+	float NewTime = time * time;
+	this->Position = this->Position + (this->Velocity.scalarMultiplication(time)) + (this->Acceleration.scalarMultiplication(NewTime).scalarMultiplication(0.5f));
 }
 
 void P6Particle::UpdateVelocity(float time) {
 	//Vf = Vi A t
-	this->Velocity = this->Velocity + (this->Acceleration * time);
+	this->Velocity = this->Velocity + (this->Acceleration.scalarMultiplication(time));
 }
 
 void P6Particle::update(float time) {

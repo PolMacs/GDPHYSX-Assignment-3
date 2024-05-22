@@ -23,6 +23,14 @@ namespace P6 {
 
 		void operator-=(const MyVector v);
 
+		MyVector operator+(const MyVector v);
+
+		MyVector operator-(const MyVector v);
+
+		MyVector operator*(const MyVector v);
+
+		MyVector operator/(const MyVector v);
+
 		MyVector scalarMultiplication(float scale);
 
 		void operator*=(const MyVector v); 

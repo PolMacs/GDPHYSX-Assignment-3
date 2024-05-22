@@ -26,6 +26,23 @@ void MyVector::operator-= (const MyVector v) {
 	this->z -= v.z;
 }
 
+MyVector MyVector::operator+ (const MyVector v) {
+	return MyVector(this->x + v.x, this->y + v.y, this->z + v.z);
+}
+
+MyVector MyVector::operator- (const MyVector v) {
+	return MyVector(this->x - v.x, this->y - v.y, this->z - v.z);
+}
+
+MyVector MyVector::operator* (const MyVector v) {
+	return MyVector(this->x * v.x, this->y * v.y, this->z * v.z);
+}
+
+MyVector MyVector::operator/ (const MyVector v) {
+	return MyVector(this->x / v.x, this->y / v.y, this->z / v.z);
+}
+
+
 MyVector P6::MyVector::scalarMultiplication(const float toScale) {
 	return MyVector(toScale * x, toScale * y, toScale * z);
 }

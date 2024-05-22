@@ -80,7 +80,7 @@ int main(void)
         return -1;
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(window_width, window_height, "Matthew Jayd Baldonado", NULL, NULL);
+    window = glfwCreateWindow(window_width, window_height, "Matthew Jayd Baldonado | Paul Davidion Macaraeg", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -193,9 +193,9 @@ int main(void)
     float y = 0.0;
     float z = 0.0;
 
-    float scale_x = 1.0;
-    float scale_y = 1.0;
-    float scale_z = 1.0;
+    float scale_x = 500.0;
+    float scale_y = 500.0;
+    float scale_z = 500.0;
 
     float axis_x = 0.0;
     float axis_y = 1.0;
@@ -203,16 +203,18 @@ int main(void)
 
     float theta = 0.0;
 
-    ////Create projection matrix
-    //glm::mat4 projectionMatrix = glm::ortho(-2.f, //L
-    //    2.f,//R
-    //    -2.f,//B
-    //    2.f,//T
-    //    -1.f,//Znear
-    //    1.f);//Zfar
+
+    //Create projection matrix
+    glm::mat4 projectionMatrix = glm::ortho(-400.f, //L
+        400.f,//R
+        -400.f,//B
+        400.f,//T
+        -400.f,//Znear
+        400.f);//Zfar
+
 
     P6::MyVector position(0, 3, 0);
-    P6::MyVector scale(3, 3, 0);
+    P6::MyVector scale(30, 30, 0);
 
     std::cout << "Magnitude" << std::endl;
     std::cout << position.Magnitude() << std::endl;
@@ -238,6 +240,7 @@ int main(void)
 
     //time in between frames
     constexpr std::chrono::nanoseconds timestep(16ms);
+
     //initializing clock variables
     using clock = std::chrono::high_resolution_clock;
     auto curr_time = clock::now();
@@ -248,13 +251,10 @@ int main(void)
     P6::P6Particle particle = P6::P6Particle();
 
     //this is 100m/s to the right
-    particle.Velocity = P6::MyVector(100, 0, 0);
+    particle.Velocity = P6::MyVector(0, 100, 0);
 
     //this is 100m/s to the left
-    particle.Acceleration = P6::MyVector(-30, 0, 0);
-
-
-
+    particle.Acceleration = P6::MyVector(0, -30, 0);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -278,34 +278,37 @@ int main(void)
             curr_ns -= curr_ns;
 
             //updates
-            std::cout << "P6 Update\n";
+            // 
+            //std::cout << "P6 Update\n";
+
+            std::cout << "Position: " << particle.Position.x << ", " << particle.Position.y << ", " << particle.Position.z << std::endl;
+            std::cout << "Velocity: " << particle.Velocity.x << ", " << particle.Velocity.y << ", " << particle.Velocity.z << std::endl;
 
             particle.update((float)ms.count() / 1000);
         }
 
-        std::cout << "Normal Update\n";
+        //std::cout << "Normal Update\n";
 
         z = z_mod;
 
         //Start with the translation matrix
-        glm::mat4 transformation_matrix = glm::translate(identity_martix, glm::vec3(x, y, z));
+        glm::mat4 transformation_matrix = glm::translate(identity_martix, (glm::vec3)particle.Position);
 
         //Multiply the resulting matrix with the scale matrix
-        transformation_matrix = glm::scale(transformation_matrix, glm::vec3(scale_x, scale_y, scale_z));
+        transformation_matrix = glm::scale(transformation_matrix, (glm::vec3)scale);
 
         //Finally, multiply it with the rotation matrix
         transformation_matrix = glm::rotate(transformation_matrix, glm::radians(theta), glm::normalize(glm::vec3(axis_x, axis_y, axis_z)));
 
-        ////Get location of projection matrix
-        //unsigned int projectionLoc = glGetUniformLocation(shaderProg, "projection");
-        ////Assign the matrix
-        //glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+        //Get location of projection matrix
+        unsigned int projectionLoc = glGetUniformLocation(shaderProg, "projection");
+        //Assign the matrix
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
-        ////Get location of transformation matrix
-        //unsigned int transformLoc = glGetUniformLocation(shaderProg, "transform");
-        ////Assign the matrix
-        //glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformation_matrix));
-
+        //Get location of transformation matrix
+        unsigned int transformLoc = glGetUniformLocation(shaderProg, "transform");
+        //Assign the matrix
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformation_matrix));
 
         //Tell openGL to use this shader
         //for VAO/s below
